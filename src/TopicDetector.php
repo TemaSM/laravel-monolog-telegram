@@ -48,34 +48,47 @@ class TopicDetector
 
     private function getTopicByRoute(): string|null
     {
-        $topicId = null;
         $route = Route::current();
 
         if (!isset($route->getAction()['controller'])) {
             return null;
         }
 
+        [$controller, $method] = $this->extractControllerAndMethod($route);
+
+        if ($controller === null) {
+            return null;
+        }
+
+        $topicId = $this->getTopicIdByReflection($controller, $method);
+
+        return $topicId !== false
+            ? $topicId
+            : $this->getTopicIdByRegex($controller, $method);
+    }
+
+    private function extractControllerAndMethod($route): array
+    {
         if ($this->isLivewire() && app('livewire')->isLivewireRequest()) {
-            [$controller, $method] = $this->getMainLivewireClass();
-        } else {
-            [$controller, $method] = explode('@', $route->getAction()['controller']);
+            return $this->getMainLivewireClass();
         }
 
-        if ($controller !== null) {
-            $topicId = $this->getTopicIdByReflection($controller, $method);
+        $controllerAction = $route->getAction()['controller'];
 
-            if ($topicId === false) {
-                $topicId = $this->getTopicIdByRegex($controller, $method);
-            }
+        if (str_contains($controllerAction, '@')) {
+            return explode('@', $controllerAction, 2);
         }
 
-        return $topicId;
+        return [$controllerAction, '__invoke'];
     }
 
     // Job function
     private function appRunningWithJob(): bool
     {
-        return (isset($e->job) || app()->bound('queue.worker'));
+        if (isset($e->job) || app()->bound('queue.worker')) {
+            return true;
+        }
+        return false;
     }
 
     private function getJobClass(): string|null
@@ -227,7 +240,8 @@ class TopicDetector
         $method = null;
 
         try {
-            $payload = request()->all();
+            $request = request();
+            $payload = $request->all();
 
             if (isset($payload['components'][0])) {
                 $componentData = $payload['components'][0];
