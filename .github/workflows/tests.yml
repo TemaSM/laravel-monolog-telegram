@@ -47,10 +47,20 @@ jobs:
       - name: Run tests
         run: |
           if [[ "${{ matrix.php }}" == "8.4" && "${{ matrix.dependency-version }}" == "prefer-stable" ]]; then
-            vendor/bin/phpunit --testdox --coverage-clover coverage.xml
+            vendor/bin/phpunit --testdox --coverage-clover coverage.xml --log-junit junit.xml
           else
-            vendor/bin/phpunit --testdox
+            vendor/bin/phpunit --testdox --log-junit junit.xml
           fi
+
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: php-${{ matrix.php }}
+          files: ./junit.xml
+          fail_ci_if_error: false
+          verbose: true
 
       - name: Upload coverage to Codecov
         if: matrix.php == '8.4' && matrix.dependency-version == 'prefer-stable'
