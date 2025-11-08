@@ -73,8 +73,9 @@ class TelegramFormatter implements FormatterInterface
 
             try {
                 $message = $this->getMessageForException($exception);
-            } catch (\Exception $e) {
-                //
+            } catch (\Throwable $e) {
+                error_log('Telegram formatter error: ' . $e->getMessage());
+                $message = '<b>Error formatting exception message</b>';
             }
 
             return $message;
@@ -131,8 +132,8 @@ class TelegramFormatter implements FormatterInterface
             if (strpos($exception->getMessage(), 'Telegram') !== false && isset($exception->getTrace()[1]['args'][1]['chat_id'])) {
                 $message .= '<b>Chat Id: </b> ' . $exception->getTrace()[1]['args'][1]['chat_id'] . PHP_EOL;
             }
-        } catch (\Exception $e) {
-            // do noting
+        } catch (\Throwable $e) {
+            error_log('Telegram formatter chat_id extraction error: ' . $e->getMessage());
         }
 
         if (!is_null($request->user())) {

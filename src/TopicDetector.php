@@ -173,7 +173,7 @@ class TopicDetector
             }
 
         } catch (\Throwable $e) {
-
+            error_log("Topic detector reflection error for {$class}::{$method}: " . $e->getMessage());
         }
 
         return false;
@@ -216,6 +216,7 @@ class TopicDetector
             }
 
         } catch (\Throwable $e) {
+            error_log("Topic detector regex parsing error for {$class}::{$method}: " . $e->getMessage());
         }
 
         return null;
@@ -251,7 +252,7 @@ class TopicDetector
                 }
             }
         } catch (\Throwable $exception) {
-            //report($exception);
+            error_log('Livewire class parsing error: ' . $exception->getMessage());
         }
 
         return [$class, $method];
