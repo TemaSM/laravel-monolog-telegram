@@ -80,7 +80,7 @@ class TopicDetector
     // Job function
     protected function appRunningWithJob(): bool
     {
-        return (isset($e->job) || app()->bound('queue.worker'));
+        return app()->bound('queue.worker');
     }
 
     protected function getJobClass(): string|null
