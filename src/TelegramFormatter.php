@@ -73,8 +73,9 @@ class TelegramFormatter implements FormatterInterface
 
             try {
                 $message = $this->getMessageForException($exception);
-            } catch (\Exception $e) {
-                //
+            } catch (\Throwable $e) {
+                error_log('Telegram formatter error: ' . $e->getMessage());
+                $message = '<b>Error formatting exception message</b>';
             }
 
             return $message;
@@ -131,8 +132,8 @@ class TelegramFormatter implements FormatterInterface
             if (strpos($exception->getMessage(), 'Telegram') !== false && isset($exception->getTrace()[1]['args'][1]['chat_id'])) {
                 $message .= '<b>Chat Id: </b> ' . $exception->getTrace()[1]['args'][1]['chat_id'] . PHP_EOL;
             }
-        } catch (\Exception $e) {
-            // do noting
+        } catch (\Throwable $e) {
+            error_log('Telegram formatter chat_id extraction error: ' . $e->getMessage());
         }
 
         if (!is_null($request->user())) {
@@ -244,12 +245,36 @@ class TelegramFormatter implements FormatterInterface
     {
         $sensitiveFields = [
             'password',
+            'password_confirmation',
+            'old_password',
+            'new_password',
             'auth',
+            'authorization',
+            'bearer',
             'token',
+            'access_token',
+            'refresh_token',
+            'id_token',
+            'api_token',
             'key',
-            'credential',
+            'api_key',
+            'apikey',
+            'private_key',
+            'public_key',
             'secret',
-            'password_confirmation'
+            'client_secret',
+            'credential',
+            'credentials',
+            'ssn',
+            'social_security',
+            'credit_card',
+            'card_number',
+            'cvv',
+            'cvc',
+            'pin',
+            'otp',
+            'code',
+            'verification_code',
         ];
 
         $data = $request->except($sensitiveFields);

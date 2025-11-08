@@ -60,6 +60,13 @@ class TelegramBotHandler extends AbstractProcessingHandler
     protected int $timeout;
 
     /**
+     * SSL verification enabled.
+     *
+     * @var bool
+     */
+    protected bool $verifySsl;
+
+    /**
      * @param string $token Telegram bot access token provided by BotFather
      * @param string $channel Telegram channel name
      * @inheritDoc
@@ -74,9 +81,26 @@ class TelegramBotHandler extends AbstractProcessingHandler
         bool        $bubble = true,
         string      $bot_api = 'https://api.telegram.org/bot',
         string|null $proxy = null,
-        int         $timeout = 5
+        int         $timeout = 5,
+        bool        $verify_ssl = true
     )
     {
+        if (empty($token) || !is_string($token)) {
+            throw new \InvalidArgumentException('Bot token must be a non-empty string');
+        }
+
+        if (!is_string($chat_id) && !is_int($chat_id)) {
+            throw new \InvalidArgumentException('Chat ID must be a string or integer');
+        }
+
+        if ($timeout < 1 || $timeout > 300) {
+            throw new \InvalidArgumentException('Timeout must be between 1 and 300 seconds');
+        }
+
+        if ($proxy !== null && !is_string($proxy)) {
+            throw new \InvalidArgumentException('Proxy must be a string or null');
+        }
+
         parent::__construct($level, $bubble);
 
         $this->token = $token;
@@ -88,6 +112,7 @@ class TelegramBotHandler extends AbstractProcessingHandler
         $this->bubble = $bubble;
         $this->proxy = $proxy;
         $this->timeout = $timeout;
+        $this->verifySsl = $verify_ssl;
 
         $this->topicDetector = new TopicDetector($topics_level);
     }
@@ -137,9 +162,9 @@ class TelegramBotHandler extends AbstractProcessingHandler
         $message = $this->truncateTextToTelegramLimit($message);
 
         if (empty($this->queue)) {
-            dispatch_sync(new SendJob($url, $message, $chatId, $topicId, $this->proxy, $this->timeout));
+            dispatch_sync(new SendJob($url, $message, $chatId, $topicId, $this->proxy, $this->timeout, $this->verifySsl));
         } else {
-            dispatch(new SendJob($url, $message, $chatId, $topicId, $this->proxy, $this->timeout))->onQueue($this->queue);
+            dispatch(new SendJob($url, $message, $chatId, $topicId, $this->proxy, $this->timeout, $this->verifySsl))->onQueue($this->queue);
         }
     }
 }
