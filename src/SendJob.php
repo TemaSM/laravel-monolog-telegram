@@ -26,6 +26,7 @@ class SendJob implements ShouldQueue
         private string|int|null $topicId = null,
         private string|null $proxy = null,
         private int         $timeout = 5,
+        private bool        $verifySsl = true,
     )
     {
     }
@@ -33,7 +34,7 @@ class SendJob implements ShouldQueue
     public function handle(): void
     {
         $httpClientOption = [];
-        $httpClientOption['verify'] = false;
+        $httpClientOption['verify'] = $this->verifySsl;
 
         if (!is_null($this->proxy)) {
             $httpClientOption['proxy'] = $this->proxy;

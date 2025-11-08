@@ -60,6 +60,13 @@ class TelegramBotHandler extends AbstractProcessingHandler
     protected int $timeout;
 
     /**
+     * SSL verification enabled.
+     *
+     * @var bool
+     */
+    protected bool $verifySsl;
+
+    /**
      * @param string $token Telegram bot access token provided by BotFather
      * @param string $channel Telegram channel name
      * @inheritDoc
@@ -74,7 +81,8 @@ class TelegramBotHandler extends AbstractProcessingHandler
         bool        $bubble = true,
         string      $bot_api = 'https://api.telegram.org/bot',
         string|null $proxy = null,
-        int         $timeout = 5
+        int         $timeout = 5,
+        bool        $verify_ssl = true
     )
     {
         parent::__construct($level, $bubble);
@@ -88,6 +96,7 @@ class TelegramBotHandler extends AbstractProcessingHandler
         $this->bubble = $bubble;
         $this->proxy = $proxy;
         $this->timeout = $timeout;
+        $this->verifySsl = $verify_ssl;
 
         $this->topicDetector = new TopicDetector($topics_level);
     }
@@ -137,9 +146,9 @@ class TelegramBotHandler extends AbstractProcessingHandler
         $message = $this->truncateTextToTelegramLimit($message);
 
         if (empty($this->queue)) {
-            dispatch_sync(new SendJob($url, $message, $chatId, $topicId, $this->proxy, $this->timeout));
+            dispatch_sync(new SendJob($url, $message, $chatId, $topicId, $this->proxy, $this->timeout, $this->verifySsl));
         } else {
-            dispatch(new SendJob($url, $message, $chatId, $topicId, $this->proxy, $this->timeout))->onQueue($this->queue);
+            dispatch(new SendJob($url, $message, $chatId, $topicId, $this->proxy, $this->timeout, $this->verifySsl))->onQueue($this->queue);
         }
     }
 }
