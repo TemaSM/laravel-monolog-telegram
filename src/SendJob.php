@@ -22,8 +22,8 @@ class SendJob implements ShouldQueue
     public function __construct(
         private string      $url,
         private string      $message,
-        private string      $chatId,
-        private string|null $topicId = null,
+        private string|int  $chatId,
+        private string|int|null $topicId = null,
         private string|null $proxy = null,
         private int         $timeout = 5,
     )
