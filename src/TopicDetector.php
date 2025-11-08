@@ -189,8 +189,21 @@ class TopicDetector
     protected function getTopicIdByRegex(string $class, string $method): string|int|null
     {
         try {
-            $filePath = base_path(str_replace('App', 'app', $class) . '.php');
-            $fileContent = file_get_contents($filePath);
+            // Convert namespace to file path (e.g., App\Jobs\ProcessData -> app/Jobs/ProcessData.php)
+            $classPath = str_replace('\\', '/', $class);
+            // Only replace the first occurrence of 'App' to handle classes like 'App\ApprovalController'
+            $classPath = preg_replace('/^' . preg_quote(self::APP_NAMESPACE, '/') . '/', self::APP_DIRECTORY, $classPath, 1);
+            $filePath = base_path($classPath . '.php');
+
+            // Security: Validate file path is within base_path to prevent directory traversal
+            $realPath = realpath($filePath);
+            $basePath = realpath(base_path());
+            if ($realPath === false || $basePath === false || !str_starts_with($realPath, $basePath)) {
+                error_log("Topic detector: Invalid file path attempted: {$filePath}");
+                return null;
+            }
+
+            $fileContent = file_get_contents($realPath);
             $allAttributes = [];
 
             if (preg_match_all(self::ATTRIBUTE_REGEX, $fileContent, $matches, PREG_SET_ORDER)) {
