@@ -10,6 +10,54 @@ This is a **Monolog handler for Laravel** that sends log messages to Telegram in
 
 **⚠️ PRODUCTION READINESS**: This library has **19 remaining bugs** (4 fixed from total 23), **5 security vulnerabilities remaining** (3 fixed from total 8), and **88 tests with comprehensive coverage** (74 Unit, 10 Integration, 4 Feature). Risk Level: **🟡 MEDIUM** - Ready for staging testing with CI/CD. See Recent Fixes below.
 
+## Git Commit Guidelines
+
+All commits in this repository must follow **Conventional Commits** specification with clean, professional messages.
+
+### Commit Message Format
+
+```
+<type>(<scope>): <subject>
+
+<body>
+```
+
+**Rules:**
+- **Type**: `feat`, `fix`, `docs`, `test`, `ci`, `refactor`, `chore`, `perf`, `style`
+- **Scope**: Optional, e.g., `deps`, `tests`, `topic`
+- **Subject**: Clear, concise description in imperative mood (50 chars max)
+- **Body**: Optional detailed explanation with bullet points
+
+### Prohibited Content
+
+**NEVER include in commit messages:**
+- ❌ `Signed-off-by:` trailers
+- ❌ `Co-Authored-By:` trailers
+- ❌ Mentions of AI tools (Claude Code, etc.)
+- ❌ Generated with... footers
+- ❌ Tool attribution signatures
+
+### Examples
+
+**Good:**
+```
+ci: add Codecov Test Analytics integration
+
+- Add JUnit XML generation for all PHP versions
+- Configure codecov/test-results-action@v1
+- Enable upload even on test failures
+- Flag results by PHP version (php-8.0 to php-8.4)
+```
+
+**Bad:**
+```
+ci: add Codecov Test Analytics integration
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
 ## Technology Stack
 
 - **PHP**: 8.0+
