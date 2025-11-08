@@ -245,12 +245,36 @@ class TelegramFormatter implements FormatterInterface
     {
         $sensitiveFields = [
             'password',
+            'password_confirmation',
+            'old_password',
+            'new_password',
             'auth',
+            'authorization',
+            'bearer',
             'token',
+            'access_token',
+            'refresh_token',
+            'id_token',
+            'api_token',
             'key',
-            'credential',
+            'api_key',
+            'apikey',
+            'private_key',
+            'public_key',
             'secret',
-            'password_confirmation'
+            'client_secret',
+            'credential',
+            'credentials',
+            'ssn',
+            'social_security',
+            'credit_card',
+            'card_number',
+            'cvv',
+            'cvc',
+            'pin',
+            'otp',
+            'code',
+            'verification_code',
         ];
 
         $data = $request->except($sensitiveFields);
