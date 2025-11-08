@@ -4,5 +4,5 @@ namespace TheCoder\MonologTelegram\Attributes;
 
 interface TopicLogInterface
 {
-    public function getTopicID(array $topicsLevel): string|null;
+    public function getTopicId(array $topicsLevel): string|null;
 }
