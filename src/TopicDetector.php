@@ -9,6 +9,13 @@ use Illuminate\Support\Facades\Route;
 
 class TopicDetector
 {
+    private const JOBS_NAMESPACE = 'App\Jobs';
+    private const CONSOLE_COMMANDS_NAMESPACE = 'Console\Commands';
+    private const HANDLE_METHOD = 'handle';
+    private const APP_DIRECTORY = 'app';
+    private const APP_NAMESPACE = 'App';
+    private const ATTRIBUTE_REGEX = '/\#\[\s*(.*?)\s*\]\s*public\s*function\s*(\w+)/';
+
     private array $topicsLevel;
     private mixed $exception;
     private mixed $trace;
@@ -90,7 +97,7 @@ class TopicDetector
         }
 
         foreach ($this->trace as $frame) {
-            if ($frame['function'] === 'handle' && isset($frame['class']) && str_contains($frame['class'], 'App\Jobs')) {
+            if ($frame['function'] === self::HANDLE_METHOD && isset($frame['class']) && str_contains($frame['class'], self::JOBS_NAMESPACE)) {
                 return $frame['class'];
             }
         }
@@ -104,10 +111,10 @@ class TopicDetector
         $jobClass = $this->getJobClass();
 
         if ($jobClass !== null) {
-            $topicId = $this->getTopicIdByReflection($jobClass, 'handle');
+            $topicId = $this->getTopicIdByReflection($jobClass, self::HANDLE_METHOD);
 
             if ($topicId === false) {
-                $topicId = $this->getTopicIdByRegex($jobClass, 'handle');
+                $topicId = $this->getTopicIdByRegex($jobClass, self::HANDLE_METHOD);
             }
         }
 
@@ -124,17 +131,17 @@ class TopicDetector
     {
         $filePath = $this->exception->getFile();
 
-        if (str_contains($filePath, 'Console\Commands')) {
-            $appPosition = strpos($filePath, 'app');
+        if (str_contains($filePath, self::CONSOLE_COMMANDS_NAMESPACE)) {
+            $appPosition = strpos($filePath, self::APP_DIRECTORY);
 
             if ($appPosition !== false) {
                 $appPath = substr($filePath, $appPosition);
-                return str_replace(['/', 'app', '.php'], ['\\', 'App', ''], $appPath);
+                return str_replace(['/', self::APP_DIRECTORY, '.php'], ['\\', self::APP_NAMESPACE, ''], $appPath);
             }
         }
 
         foreach ($this->trace as $frame) {
-            if ($frame['function'] === 'handle' && isset($frame['class']) && str_contains($frame['class'], 'Console\Commands')) {
+            if ($frame['function'] === self::HANDLE_METHOD && isset($frame['class']) && str_contains($frame['class'], self::CONSOLE_COMMANDS_NAMESPACE)) {
                 return $frame['class'];
             }
         }
@@ -148,10 +155,10 @@ class TopicDetector
         $commandClass = $this->getCommandClass();
 
         if ($commandClass !== null) {
-            $topicId = $this->getTopicIdByReflection($commandClass, 'handle');
+            $topicId = $this->getTopicIdByReflection($commandClass, self::HANDLE_METHOD);
 
             if ($topicId === false) {
-                $topicId = $this->getTopicIdByRegex($commandClass, 'handle');
+                $topicId = $this->getTopicIdByRegex($commandClass, self::HANDLE_METHOD);
             }
         }
 
@@ -186,10 +193,7 @@ class TopicDetector
             $fileContent = file_get_contents($filePath);
             $allAttributes = [];
 
-            // Regex to match attributes and methods
-            $regex = '/\#\[\s*(.*?)\s*\]\s*public\s*function\s*(\w+)/';
-
-            if (preg_match_all($regex, $fileContent, $matches, PREG_SET_ORDER)) {
+            if (preg_match_all(self::ATTRIBUTE_REGEX, $fileContent, $matches, PREG_SET_ORDER)) {
                 foreach ($matches as $match) {
                     $attributeString = $match[1];
                     $methodName = $match[2];
