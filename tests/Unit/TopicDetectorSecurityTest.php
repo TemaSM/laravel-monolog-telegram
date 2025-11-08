@@ -12,13 +12,7 @@ class TopicDetectorSecurityTest extends TestCase
         // Attempt directory traversal attack
         $maliciousClass = 'App\\..\\..\\..\\..\\etc\\passwd';
 
-        $exception = new \Exception('Test exception');
-        $record = [
-            'context' => ['exception' => $exception],
-            'level' => 500,
-        ];
-
-        $detector = new TopicDetector($record);
+        $detector = new TopicDetector([]);
 
         $reflection = new \ReflectionClass($detector);
         $method = $reflection->getMethod('getTopicIdByRegex');
@@ -35,13 +29,7 @@ class TopicDetectorSecurityTest extends TestCase
         // Use a class that doesn't exist on the filesystem
         $nonExistentClass = 'App\\Jobs\\NonExistentJob';
 
-        $exception = new \Exception('Test exception');
-        $record = [
-            'context' => ['exception' => $exception],
-            'level' => 500,
-        ];
-
-        $detector = new TopicDetector($record);
+        $detector = new TopicDetector([]);
 
         $reflection = new \ReflectionClass($detector);
         $method = $reflection->getMethod('getTopicIdByRegex');
@@ -68,13 +56,7 @@ class TestController
 }
 ');
 
-        $exception = new \Exception('Test exception');
-        $record = [
-            'context' => ['exception' => $exception],
-            'level' => 500,
-        ];
-
-        $detector = new TopicDetector($record);
+        $detector = new TopicDetector([]);
 
         // We can't easily test regex parsing with invalid syntax
         // because the regex pattern is designed to be permissive
@@ -91,13 +73,7 @@ class TestController
         $tempFile = sys_get_temp_dir() . '/EmptyController.php';
         file_put_contents($tempFile, '<?php');
 
-        $exception = new \Exception('Test exception');
-        $record = [
-            'context' => ['exception' => $exception],
-            'level' => 500,
-        ];
-
-        $detector = new TopicDetector($record);
+        $detector = new TopicDetector([]);
 
         // Empty file should cause getTopicIdByRegex to return null
         // because there are no attributes to match

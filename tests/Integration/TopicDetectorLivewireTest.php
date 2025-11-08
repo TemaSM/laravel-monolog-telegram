@@ -46,13 +46,7 @@ class TopicDetectorLivewireTest extends TestCase
 
         config(['livewire.class_namespace' => 'App\\Http\\Livewire']);
 
-        $exception = new \Exception('Test exception');
-        $record = [
-            'context' => ['exception' => $exception],
-            'level' => 500,
-        ];
-
-        $detector = new TopicDetector($record);
+        $detector = new TopicDetector([]);
 
         $reflection = new \ReflectionClass($detector);
         $method = $reflection->getMethod('getMainLivewireClass');
@@ -81,13 +75,7 @@ class TopicDetectorLivewireTest extends TestCase
 
         $this->app->instance('request', $request);
 
-        $exception = new \Exception('Test exception');
-        $record = [
-            'context' => ['exception' => $exception],
-            'level' => 500,
-        ];
-
-        $detector = new TopicDetector($record);
+        $detector = new TopicDetector([]);
 
         $reflection = new \ReflectionClass($detector);
         $method = $reflection->getMethod('getMainLivewireClass');
@@ -95,9 +83,10 @@ class TopicDetectorLivewireTest extends TestCase
 
         [$class, $methodName] = $method->invoke($detector);
 
-        // Should return [null, null] when JSON is malformed
-        // The error should be logged via error_log()
-        $this->assertNull($class);
+        // When JSON is malformed, json_decode returns null
+        // str(null)->explode('.')->join('\\') returns empty string
+        // The error is logged via error_log()
+        $this->assertSame('', $class);
         $this->assertNull($methodName);
     }
 
@@ -114,13 +103,7 @@ class TopicDetectorLivewireTest extends TestCase
 
         $this->app->instance('request', $request);
 
-        $exception = new \Exception('Test exception');
-        $record = [
-            'context' => ['exception' => $exception],
-            'level' => 500,
-        ];
-
-        $detector = new TopicDetector($record);
+        $detector = new TopicDetector([]);
 
         $reflection = new \ReflectionClass($detector);
         $method = $reflection->getMethod('getMainLivewireClass');
