@@ -3,10 +3,28 @@
 namespace TheCoder\MonologTelegram\Tests\Unit;
 
 use InvalidArgumentException;
-use Monolog\Level;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use TheCoder\MonologTelegram\TelegramBotHandler;
+
+// Monolog 2.x/3.x compatibility layer for Level
+if (class_exists(\Monolog\Level::class)) {
+    // Monolog 3.x (PHP 8.1+): Use native Level enum
+    class_alias(\Monolog\Level::class, 'TheCoder\MonologTelegram\Tests\Unit\Level');
+} else {
+    // Monolog 2.x (PHP 8.0): Create compatibility class using Logger constants
+    class Level
+    {
+        public const Debug = Logger::DEBUG;
+        public const Info = Logger::INFO;
+        public const Notice = Logger::NOTICE;
+        public const Warning = Logger::WARNING;
+        public const Error = Logger::ERROR;
+        public const Critical = Logger::CRITICAL;
+        public const Alert = Logger::ALERT;
+        public const Emergency = Logger::EMERGENCY;
+    }
+}
 
 class TelegramBotHandlerTest extends TestCase
 {
