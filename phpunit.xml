@@ -17,11 +17,15 @@
             <directory suffix="Test.php">./tests/Feature</directory>
         </testsuite>
     </testsuites>
-    <source>
+    <coverage cacheDirectory=".phpunit.cache/code-coverage"
+              processUncoveredFiles="true">
+        <report>
+            <clover outputFile="coverage.xml"/>
+        </report>
         <include>
             <directory suffix=".php">./src</directory>
         </include>
-    </source>
+    </coverage>
     <php>
         <env name="APP_ENV" value="testing"/>
     </php>

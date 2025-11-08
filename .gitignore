@@ -3,4 +3,5 @@ vendor
 test
 /coverage
 .phpunit.result.cache
+.phpunit.cache/
 coverage.xml

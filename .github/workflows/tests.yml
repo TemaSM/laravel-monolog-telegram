@@ -45,17 +45,21 @@ jobs:
         run: composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction --no-progress
 
       - name: Run tests
-        run: vendor/bin/phpunit --testdox
-
-      - name: Run tests with coverage
-        if: matrix.php == '8.4' && matrix.dependency-version == 'prefer-stable'
-        run: vendor/bin/phpunit --coverage-clover coverage.xml
+        run: |
+          if [[ "${{ matrix.php }}" == "8.4" && "${{ matrix.dependency-version }}" == "prefer-stable" ]]; then
+            vendor/bin/phpunit --testdox --coverage-clover coverage.xml
+          else
+            vendor/bin/phpunit --testdox
+          fi
 
       - name: Upload coverage to Codecov
         if: matrix.php == '8.4' && matrix.dependency-version == 'prefer-stable'
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           files: ./coverage.xml
+          flags: php-8.4,unittests
+          name: PHP 8.4 Coverage
+          disable_search: true
           fail_ci_if_error: false
           verbose: true
         env:
