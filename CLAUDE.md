@@ -8,7 +8,7 @@ This is a **Monolog handler for Laravel** that sends log messages to Telegram in
 
 **Package Name**: `thecoder/laravel-monolog-telegram`
 
-**⚠️ PRODUCTION READINESS**: This library has **19 remaining bugs** (4 critical fixed), **5 security vulnerabilities** (3 fixed), and **88 tests with comprehensive coverage** (74 Unit, 10 Integration, 4 Feature). Risk Level: **🟡 MEDIUM** - Ready for staging testing with CI/CD. See Recent Fixes below.
+**⚠️ PRODUCTION READINESS**: This library has **19 remaining bugs** (4 fixed from total 23), **5 security vulnerabilities remaining** (3 fixed from total 8), and **88 tests with comprehensive coverage** (74 Unit, 10 Integration, 4 Feature). Risk Level: **🟡 MEDIUM** - Ready for staging testing with CI/CD. See Recent Fixes below.
 
 ## Technology Stack
 
@@ -25,6 +25,7 @@ This is a **Monolog handler for Laravel** that sends log messages to Telegram in
 - **Triggers**: Push to `master` and `refactor/**` branches, all pull requests
 - **PHP Matrix**: Tests run on PHP 8.0, 8.1, 8.2, 8.3, 8.4
 - **Coverage**: Generated on PHP 8.4 with PCOV, uploaded to Codecov v5
+- **Test Analytics**: JUnit XML uploaded from all PHP versions for flakiness detection and performance tracking
 - **Optimizations**: Single test run per PHP version (30-50% faster CI), coverage caching, processUncoveredFiles enabled
 - **Status**: [![Tests](https://github.com/TemaSM/laravel-monolog-telegram/workflows/Tests/badge.svg)](https://github.com/TemaSM/laravel-monolog-telegram/actions)
 
@@ -176,9 +177,9 @@ All attributes extend `AbstractTopicLevelAttribute` and implement `TopicLogInter
 
 ---
 
-## 📦 RECENT FIXES (January 2025)
+## 📦 RECENT FIXES & IMPROVEMENTS (November 2025)
 
-The following critical issues have been fixed in 12 atomic commits:
+The following issues have been fixed and features added in 15 atomic commits:
 
 ### ✅ Latest Fixes (November 2025):
 
@@ -208,6 +209,14 @@ The following critical issues have been fixed in 12 atomic commits:
    - Added: Coverage caching (.phpunit.cache/code-coverage), processUncoveredFiles=true
    - Improved: Coverage flags (php-8.4, unittests), named reports, faster uploads (disable_search)
    - Accuracy: +5-10% more accurate coverage reporting with uncovered file tracking
+
+**15. ✅ INTEGRATED**: Codecov Test Analytics for test performance monitoring
+   - Commit: `43e9534`
+   - Added: JUnit XML generation (--log-junit) for all 5 PHP versions (8.0-8.4)
+   - Integration: codecov/test-results-action@v1 with flags per PHP version (php-8.0, php-8.1, etc.)
+   - Benefits: Flaky test detection across PHP matrix, failure rate tracking, performance regression analysis
+   - Upload: Even on test failures (if: !cancelled()) with 60-day test result retention
+   - Impact: Enhanced test observability and early detection of version-specific test issues
 
 ### ✅ Critical Bugs Fixed (4 of 23):
 
@@ -270,81 +279,9 @@ The following critical issues have been fixed in 12 atomic commits:
 
 ---
 
-## 🚨 CRITICAL BUGS (19 Remaining, 4 Fixed)
+## 🚨 REMAINING BUGS (19)
 
-### Bug #1: ✅ FIXED - Undefined Variable (TopicDetector.php:83)
-~~Removed in commit `b74b9eb`~~
-```php
-// BEFORE (buggy):
-return (isset($e->job) || app()->bound('queue.worker'));  // $e undefined!
-
-// AFTER (fixed):
-return app()->bound('queue.worker');
-```
-**Status**: ✅ FIXED
-**Impact**: Prevented PHP Fatal Error on every queue job log
-**Commit**: `b74b9eb` - fix: remove undefined variable $e in appRunningWithJob
-
-### Bug #2: ✅ FIXED - Method Name Case Mismatch (AbstractTopicLevelAttribute.php:7 vs TopicDetector.php:172)
-```php
-// BEFORE - Interface (TopicLogInterface.php):
-public function getTopicID(array $topicsLevel): string|null;  // Uppercase 'ID'
-
-// BEFORE - Implementation (AbstractTopicLevelAttribute.php):
-public function getTopicID(array $topicsLevel): string|null;  // Uppercase 'ID'
-
-// AFTER - Standardized everywhere:
-public function getTopicId(array $topicsLevel): string|null;  // camelCase 'd'
-```
-**Status**: ✅ FIXED
-**Impact**: Prevented Fatal Error "Call to undefined method" on Linux production
-**Commit**: `96819f8` - fix: standardize method name to getTopicId
-**Severity**: CRITICAL - Production crashes on Linux
-
-### Bug #3: ✅ FIXED - Type Mismatch - SendJob Constructor (SendJob.php:25)
-```php
-// BEFORE - SendJob.php:
-private string $chatId,  // Declared as string only
-private string|null $topicId = null,  // topicId also wrong type
-
-// But TelegramBotHandler.php:69 passes:
-string|int $chat_id,  // Can be int
-string|int|null $topic_id = null,  // Can be int
-
-// AFTER - Fixed types:
-private string|int $chatId,  // Now accepts both
-private string|int|null $topicId = null,  // Now accepts int|null
-```
-**Status**: ✅ FIXED
-**Impact**: Prevented type coercion issues and queue serialization failures
-**Commit**: `b94bba3` - fix: correct type declarations in SendJob
-**Severity**: HIGH
-
-### Bug #4: ✅ FIXED - File Path Construction Bug (TopicDetector.php:185)
-```php
-// BEFORE - Broken path construction:
-$filePath = base_path(str_replace('App', 'app', $class) . '.php');
-// Issues:
-// - Replaces ALL 'App' → 'app': App\ApprovalController → app\approvalController
-// - No security validation for directory traversal
-
-// AFTER - Proper construction with security:
-$classPath = str_replace('\\', '/', $class);
-$classPath = preg_replace('/^' . preg_quote(self::APP_NAMESPACE, '/') . '/', self::APP_DIRECTORY, $classPath, 1);
-$filePath = base_path($classPath . '.php');
-
-// Security: Validate file path is within base_path
-$realPath = realpath($filePath);
-$basePath = realpath(base_path());
-if ($realPath === false || $basePath === false || !str_starts_with($realPath, $basePath)) {
-    error_log("Topic detector: Invalid file path attempted: {$filePath}");
-    return null;
-}
-```
-**Status**: ✅ FIXED
-**Impact**: Fixed path construction for classes like `App\ApprovalController` + added directory traversal protection
-**Commit**: `582e349` - fix: correct file path construction and add security validation
-**Severity**: HIGH - Breaks with non-standard namespaces
+**Note**: 4 critical bugs have been fixed (see "Critical Bugs Fixed" section above in Recent Fixes). The bugs listed below are remaining issues categorized by severity.
 
 ### Bug #5: Race Condition in Queue Detection (TopicDetector.php:88)
 ```php
@@ -859,22 +796,7 @@ Replace all empty catch blocks with:
 
 ### Priority 2: HIGH (Fix This Month)
 
-**6. Expand Sensitive Data Masking**
-```php
-$sensitiveFields = [
-    'password', 'password_confirmation', 'old_password',
-    'token', 'auth', 'authorization', 'bearer',
-    'key', 'api_key', 'apikey', 'private_key', 'public_key',
-    'secret', 'client_secret',
-    'credential', 'credentials',
-    'access_token', 'refresh_token', 'id_token',
-    'ssn', 'social_security',
-    'credit_card', 'card_number', 'cvv', 'cvc',
-    'pin', 'otp', 'code',
-];
-```
-
-**7. Add Input Validation**
+**6. Add Input Validation**
 ```php
 // TelegramBotHandler constructor
 if (empty($token) || !is_string($token)) {
@@ -1103,18 +1025,7 @@ Based on comprehensive analysis (updated after refactoring):
 
 **Overall Assessment**: **C-** (Below Average, Improving)
 
-**Risk Level**: 🟡 **MEDIUM** - Critical bugs fixed, 3 security vulnerabilities patched, still needs tests
-
-**Recent Progress** (2025-01-08 → 2025-11-08):
-- ✅ Fixed 4 critical bugs (23 → 19)
-- ✅ Patched 3 security vulnerabilities (8 → 5)
-- ✅ Eliminated 3 code smells (15 → 12)
-- ✅ Added comprehensive error logging
-- ✅ Reduced technical debt by ~25%
-- ✅ Extended Laravel support (9.x → 12.x) with PHP 8.0-8.4 compatibility
-- ✅ Added Monolog 2.x/3.x compatibility layer for seamless version detection
-- ✅ Expanded test suite: 84 → 88 tests (added 4 Feature tests for end-to-end validation)
-- ✅ Optimized CI/CD: Codecov v5 upgrade, 30-50% faster builds, improved coverage accuracy
+**Risk Level**: 🟡 **MEDIUM** - See detailed "Recent Fixes & Improvements" section above for complete progress tracking
 
 ---
 
@@ -1305,6 +1216,7 @@ This library implements an innovative idea (attribute-based topic routing for Te
 - **Added Monolog compatibility layer**: 1.x/2.x/3.x automatic detection
 - **Expanded test suite**: 84 → 88 tests (added 4 Feature tests for end-to-end validation)
 - **Optimized CI/CD pipeline**: Codecov v5, 30-50% faster builds, 5-10% better coverage accuracy
+- **Integrated Test Analytics**: JUnit XML tracking across all PHP versions for flaky test detection
 
 ### Remaining Issues ⚠️
 - 19 bugs (mostly medium severity, critical ones fixed)
