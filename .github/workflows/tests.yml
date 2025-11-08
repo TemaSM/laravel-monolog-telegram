@@ -49,7 +49,7 @@ jobs:
           if [[ "${{ matrix.php }}" == "8.4" && "${{ matrix.dependency-version }}" == "prefer-stable" ]]; then
             vendor/bin/phpunit --testdox --coverage-clover coverage.xml --log-junit junit.xml
           else
-            vendor/bin/phpunit --testdox --coverage-clover coverage.xml --log-junit junit.xml
+            vendor/bin/phpunit --testdox --log-junit junit.xml
           fi
 
       - name: Upload test results to Codecov
