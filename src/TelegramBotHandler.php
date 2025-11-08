@@ -85,6 +85,22 @@ class TelegramBotHandler extends AbstractProcessingHandler
         bool        $verify_ssl = true
     )
     {
+        if (empty($token) || !is_string($token)) {
+            throw new \InvalidArgumentException('Bot token must be a non-empty string');
+        }
+
+        if (!is_string($chat_id) && !is_int($chat_id)) {
+            throw new \InvalidArgumentException('Chat ID must be a string or integer');
+        }
+
+        if ($timeout < 1 || $timeout > 300) {
+            throw new \InvalidArgumentException('Timeout must be between 1 and 300 seconds');
+        }
+
+        if ($proxy !== null && !is_string($proxy)) {
+            throw new \InvalidArgumentException('Proxy must be a string or null');
+        }
+
         parent::__construct($level, $bubble);
 
         $this->token = $token;
