@@ -1,5 +1,10 @@
 # Real-Time Laravel exception logs in your Telegram 🚀
 
+[![Tests](https://github.com/TemaSM/laravel-monolog-telegram/workflows/Tests/badge.svg)](https://github.com/TemaSM/laravel-monolog-telegram/actions)
+[![codecov](https://codecov.io/gh/TemaSM/laravel-monolog-telegram/branch/master/graph/badge.svg)](https://codecov.io/gh/TemaSM/laravel-monolog-telegram)
+[![PHPUnit](https://img.shields.io/badge/PHPUnit-10.x-blue.svg)](https://phpunit.de/)
+[![PHP Version](https://img.shields.io/badge/PHP-8.0%2B-777BB4.svg)](https://www.php.net/)
+
 ## ScreenShot
 
 ![image](https://user-images.githubusercontent.com/3877538/172431112-020d7a7c-f515-49bc-961a-3f63c9ff21af.png)
